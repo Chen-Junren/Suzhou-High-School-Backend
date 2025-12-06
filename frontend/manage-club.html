@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理社团 - 社团管理系统</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 自定义 CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .nav-item .nav-link.active {
+            font-weight: bold;
+        }
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background-color: #343a40;
+            color: white;
+            padding: 1.5rem 0;
+        }
+        .sidebar a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            display: block;
+            padding: 0.75rem 1.5rem;
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+        }
+        .sidebar a:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar a.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left-color: #007bff;
+        }
+        .content {
+            padding: 2rem;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .loading-spinner {
+            display: none;
+        }
+        .message {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+        }
+        .message.success {
+            background-color: #28a745;
+        }
+        .message.error {
+            background-color: #dc3545;
+        }
+        .message.info {
+            background-color: #17a2b8;
+        }
+        .message.warning {
+            background-color: #ffc107;
+        }
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .member-row {
+            transition: background-color 0.2s;
+        }
+        .member-row:hover {
+            background-color: #f8f9fa;
+        }
+        .approval-pending {
+            background-color: #fff3cd;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fa fa-users-cog mr-2"></i>社团管理系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="clubs.html">社团列表</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="auth-nav">
+                    <!-- 登录后显示 -->
+                    <li class="nav-item dropdown" id="user-dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <img src="https://via.placeholder.com/30" alt="User" class="rounded-circle mr-2" style="width:30px; height:30px; object-fit:cover;">
+                            <span id="username-display">用户名</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="profile.html"><i class="fa fa-user mr-2"></i>个人资料</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" id="logout-btn"><i class="fa fa-sign-out-alt mr-2"></i>退出登录</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 侧边栏 -->
+            <div class="col-md-2 sidebar">
+                <h4 class="px-4 mb-4">社团管理</h4>
+                <div>
+                    <a href="#" class="active" data-section="members"><i class="fa fa-users mr-3"></i>成员管理</a>
+                    <a href="#" data-section="applications"><i class="fa fa-clipboard-list mr-3"></i>申请管理</a>
+                    <a href="#" data-section="activities"><i class="fa fa-calendar-alt mr-3"></i>活动管理</a>
+                    <a href="#" data-section="settings"><i class="fa fa-cog mr-3"></i>社团设置</a>
+                </div>
+            </div>
+
+            <!-- 主内容区 -->
+            <div class="col-md-10 content">
+                <div class="mb-4">
+                    <h1 class="display-4" id="club-name">加载中...</h1>
+                    <p class="text-muted" id="club-description">正在获取社团信息...</p>
+                </div>
+
+                <!-- 成员管理 -->
+                <div class="tab-content active" id="members-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4>成员管理</h4>
+                                <div class="input-group" style="width: 300px;">
+                                    <input type="text" id="member-search" class="form-control" placeholder="搜索成员...">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button"><i class="fa fa-search"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>头像</th>
+                                            <th>用户名</th>
+                                            <th>角色</th>
+                                            <th>加入时间</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="members-table-body">
+                                        <tr>
+                                            <td colspan="5" class="text-center">
+                                                <div class="loading-spinner">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">加载中...</span>
+                                                    </div>
+                                                    <p class="mt-3">正在加载成员列表...</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 申请管理 -->
+                <div class="tab-content d-none" id="applications-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>加入申请</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>申请人</th>
+                                            <th>申请时间</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="applications-table-body">
+                                        <tr>
+                                            <td colspan="4" class="text-center">
+                                                <div class="loading-spinner">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">加载中...</span>
+                                                    </div>
+                                                    <p class="mt-3">正在加载申请列表...</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 活动管理 -->
+                <div class="tab-content d-none" id="activities-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4>活动管理</h4>
+                                <button class="btn btn-primary" id="create-activity-btn">
+                                    <i class="fa fa-plus mr-2"></i>创建活动
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>活动名称</th>
+                                            <th>日期时间</th>
+                                            <th>地点</th>
+                                            <th>报名人数</th>
+                                            <th>状态</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="activities-table-body">
+                                        <tr>
+                                            <td colspan="6" class="text-center">
+                                                <div class="loading-spinner">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">加载中...</span>
+                                                    </div>
+                                                    <p class="mt-3">正在加载活动列表...</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 社团设置 -->
+                <div class="tab-content d-none" id="settings-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>社团设置</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="club-settings-form">
+                                <div class="mb-4">
+                                    <label for="club-name-input" class="form-label">社团名称</label>
+                                    <input type="text" class="form-control" id="club-name-input" placeholder="输入社团名称">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="club-description-input" class="form-label">社团描述</label>
+                                    <textarea class="form-control" id="club-description-input" rows="4" placeholder="输入社团描述"></textarea>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="club-category-input" class="form-label">社团分类</label>
+                                    <select class="form-control" id="club-category-input">
+                                        <option value="学术科技">学术科技</option>
+                                        <option value="文化艺术">文化艺术</option>
+                                        <option value="体育健身">体育健身</option>
+                                        <option value="社会公益">社会公益</option>
+                                        <option value="其他">其他</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="club-email-input" class="form-label">联系邮箱</label>
+                                    <input type="email" class="form-control" id="club-email-input" placeholder="输入联系邮箱">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="club-phone-input" class="form-label">联系电话</label>
+                                    <input type="tel" class="form-control" id="club-phone-input" placeholder="输入联系电话">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="form-label">成员加入方式</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="join_method" id="open-join" value="open">
+                                        <label class="form-check-label" for="open-join">开放加入（自动批准）</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="join_method" id="approval-join" value="approval">
+                                        <label class="form-check-label" for="approval-join">需要审核</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div id="settings-message" class="alert alert-info">
+                                        <i class="fa fa-info-circle mr-2"></i>修改设置后请点击保存按钮
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa fa-save mr-2"></i>保存设置
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 消息提示 -->
+    <div id="message" class="message bg-success text-white p-3 rounded shadow-lg">
+        <div class="d-flex justify-content-between align-items-center">
+            <span id="message-text"></span>
+            <button class="close-btn btn text-white" onclick="hideMessage()">&times;</button>
+        </div>
+    </div>
+
+    <!-- 隐藏的加载消息模板 -->
+    <div id="loading-message" class="col-12 text-center py-5 d-none">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">加载中...</span>
+        </div>
+        <p class="mt-3">正在加载数据，请稍候...</p>
+    </div>
+
+    <!-- 隐藏的无数据消息模板 -->
+    <div id="no-data-message" class="col-12 text-center py-5 d-none">
+        <i class="fa fa-info-circle text-5xl text-muted mb-3"></i>
+        <p class="text-muted">暂无数据</p>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- 模拟数据 -->
+    <script src="js/mock-data.js"></script>
+    <!-- 通用脚本 -->
+    <script src="js/common.js"></script>
+    <!-- 页面特定脚本 -->
+    <script src="js/manage-club.js"></script>
+</body>
+</html>

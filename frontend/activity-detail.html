@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>活动详情 - 社团管理系统</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 自定义样式 -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin-top: 2rem;
+            margin-bottom: 4rem;
+        }
+        
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 2rem;
+        }
+        
+        .activity-header {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+            background-color: #e9ecef;
+        }
+        
+        .activity-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .activity-header:hover img {
+            transform: scale(1.02);
+        }
+        
+        .activity-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            padding: 2rem;
+            color: white;
+        }
+        
+        .activity-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .activity-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .activity-meta-item {
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+        
+        .activity-meta-item i {
+            margin-right: 0.5rem;
+        }
+        
+        .activity-stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 1.5rem 0;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4c6ef5;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        .activity-content {
+            padding: 2rem;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4c6ef5;
+        }
+        
+        .activity-description {
+            line-height: 1.8;
+            color: #495057;
+            margin-bottom: 2rem;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .participant-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .participant-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .participant-card {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            width: calc(50% - 0.5rem);
+        }
+        
+        @media (max-width: 768px) {
+            .participant-card {
+                width: 100%;
+            }
+        }
+        
+        .participant-info {
+            margin-left: 0.75rem;
+        }
+        
+        .participant-name {
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+        
+        .participant-joined {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .btn-primary {
+            background-color: #4c6ef5;
+            border-color: #4c6ef5;
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3b5bdb;
+            border-color: #3b5bdb;
+        }
+        
+        .btn-secondary {
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+        }
+        
+        .btn-danger {
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .comment-form {
+            margin-bottom: 2rem;
+        }
+        
+        .comment-card {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .comment-author {
+            display: flex;
+            align-items: center;
+        }
+        
+        .comment-author-name {
+            font-weight: 500;
+            margin-left: 0.75rem;
+            margin-bottom: 0;
+        }
+        
+        .comment-date {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        
+        .comment-content {
+            line-height: 1.6;
+            color: #495057;
+        }
+        
+        .alert {
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top" id="main-navbar">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <i class="fa fa-users text-primary mr-2"></i>社团管理系统
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html"><i class="fa fa-home mr-1"></i>首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="clubs.html"><i class="fa fa-building mr-1"></i>社团</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav" id="user-menu">
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html"><i class="fa fa-sign-in-alt mr-1"></i>登录</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="register.html"><i class="fa fa-user-plus mr-1"></i>注册</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- 返回按钮 -->
+        <div class="mb-4">
+            <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                <i class="fa fa-arrow-left mr-2"></i>返回
+            </a>
+        </div>
+
+        <!-- 消息提示区 -->
+        <div id="activity-message" class="alert alert-info" role="alert" style="display: none;">
+            <i class="fa fa-info-circle mr-2"></i>
+            <span id="message-text">加载中...</span>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="loading-container" class="text-center py-5">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">加载中...</span>
+            </div>
+            <p class="mt-3">正在加载活动详情...</p>
+        </div>
+
+        <!-- 活动详情容器 -->
+        <div id="activity-container" style="display: none;">
+            <!-- 活动头部 -->
+            <div class="activity-header">
+                <img id="activity-image" src="https://via.placeholder.com/1200x600?text=活动图片" alt="活动图片">
+                <div class="activity-overlay">
+                    <h1 class="activity-title" id="activity-title"></h1>
+                    <div class="activity-meta">
+                        <div class="activity-meta-item">
+                            <i class="fa fa-calendar-alt"></i>
+                            <span id="activity-date"></span>
+                        </div>
+                        <div class="activity-meta-item">
+                            <i class="fa fa-map-marker-alt"></i>
+                            <span id="activity-location"></span>
+                        </div>
+                        <div class="activity-meta-item">
+                            <i class="fa fa-clock"></i>
+                            <span id="activity-time"></span>
+                        </div>
+                        <div class="activity-meta-item">
+                            <i class="fa fa-building"></i>
+                            <a href="" id="activity-club-link" class="text-white text-decoration-underline"></a>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary" id="activity-status"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <!-- 活动统计信息 -->
+                <div class="activity-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="participant-count">0</div>
+                        <div class="stat-label">参与人数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="comment-count">0</div>
+                        <div class="stat-label">评论数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="view-count">0</div>
+                        <div class="stat-label">浏览次数</div>
+                    </div>
+                </div>
+
+                <!-- 活动内容 -->
+                <div class="activity-content">
+                    <!-- 操作按钮 -->
+                    <div class="action-buttons" id="action-buttons"></div>
+
+                    <!-- 活动描述 -->
+                    <h2 class="section-title">活动详情</h2>
+                    <div class="activity-description" id="activity-description"></div>
+                    
+                    <!-- 活动标签 -->
+                    <div id="activity-tags" class="mb-4"></div>
+
+                    <!-- 参与者列表 -->
+                    <h2 class="section-title">参与者</h2>
+                    <div id="participants-container" class="participant-list">
+                        <div class="text-center w-100 py-3">
+                            <p>加载参与者列表中...</p>
+                        </div>
+                    </div>
+
+                    <!-- 评论区域 -->
+                    <h2 class="section-title">评论</h2>
+                    
+                    <!-- 评论表单（已登录用户可见） -->
+                    <div id="comment-form-container" class="comment-form mb-4" style="display: none;">
+                        <form id="comment-form">
+                            <div class="form-group">
+                                <label for="comment-content">发表评论</label>
+                                <textarea class="form-control" id="comment-content" rows="3" placeholder="分享你的想法..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-paper-plane mr-2"></i>发表评论
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- 评论列表 -->
+                    <div id="comments-container">
+                        <div class="text-center w-100 py-3">
+                            <p>加载评论中...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light py-4 mt-4">
+        <div class="container text-center">
+            <p class="text-muted">&copy; 2025 社团管理系统. 保留所有权利.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- 模拟数据脚本 -->
+    <script src="js/mock-data.js"></script>
+    <!-- 通用脚本 -->
+    <script src="js/common.js"></script>
+    <!-- 活动详情脚本 -->
+    <script src="js/activity-detail.js"></script>
+</body>
+</html>
