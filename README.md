@@ -141,7 +141,7 @@ curl -X POST http://localhost:8000/api-token-auth/ \
 curl -X POST http://localhost:8000/api/clubs/ \
   -H "Authorization: Token YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
-  -d '{"name": "编程社", "description": "学习编程技术", "contact_email": "program@example.com", "category": "技术", "leader_id": 1}'
+  -d '{"name": "YOUR_NAME", "description": "YOUR_DESCRIPTION", "contact_email": "example@example.com", "category": "YOUR_CATEGORY", "leader_id": YOUR_USER_ID}'
 ```
 | 关键字 (Field)       | 数据类型 | 填写内容/约束 | 可选的存储值 (Choices) |
 | :--- | :--- | :--- | :--- |
